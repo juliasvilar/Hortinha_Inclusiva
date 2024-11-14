@@ -1,13 +1,12 @@
 from tkinter.commondialog import Dialog
-from tkinter import Tk, messagebox
 import serial
+import time
 
 # Configura a conexão serial (substitua 'COM3' pela porta que seu Arduino está conectado)
-arduino = serial.Serial('COM3', 9600, timeout=1)  # Adiciona um timeout para evitar travamentos
+arduino = serial.Serial('COM5', 9600, timeout=1)  # Adiciona um timeout para evitar travamentos
+time.sleep(2)
 
 __all__ = ["showwarning"]
-
-
 
 # icons
 WARNING = "warning"
@@ -44,13 +43,21 @@ def showwarning(title=None, message=None, **options):
 def ler_dados():
     if arduino.in_waiting > 0:  # Verifica se há dados disponíveis na porta serial
         dados = arduino.readline()  # Lê a linha de dados e remove espaços e quebras de linha
-        dados = dados.decode('utf-8').strip() # Converte para string
+        dados_string = dados.decode('utf-8').strip() # Converte para string
         try:
-            return int(dados)  # Tenta converter os dados para um inteiro
+            return int(dados_string)  # Tenta converter os dados para um inteiro
         except ValueError:
-            return None  # Caso não consiga converter, retorna N one
-    return None  # Caso não haja dados
+            print("Erro.\n")  # Caso não consiga converter, retorna N one
+    return None
 
 if __name__ == "__main__":
-      # Verifica se o valor é válido
-        print("warning", showwarning("Umidade baixa... :(", "Hora de regar sua plantinha!"))
+    while True:
+        dados = ler_dados()
+        if dados is not None:
+            if dados > 45:
+                print("warning", showwarning("Umidade baixa... :(", "Hora de regar sua plantinha!"))
+            else:
+                print("Não precisa regar.\n")
+        else:
+            print("Nenhum dado recebido.\n")
+        time.sleep(1)
